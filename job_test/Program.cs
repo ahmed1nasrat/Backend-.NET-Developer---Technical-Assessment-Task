@@ -1,35 +1,119 @@
+using job_test.Application.Interfaces;
+using job_test.Infrastructure.Authentication;
+using job_test.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
-namespace job_test
+var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddControllers();
+
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters =
+        new TokenValidationParameters
         {
-            var builder = WebApplication.CreateBuilder(args);
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
 
-            // Add services to the container.
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
 
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            ValidAudience = builder.Configuration["Jwt:Audience"],
 
-            var app = builder.Build();
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    builder.Configuration["Jwt:Key"]!))
+        };
+});
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+
+builder.Services.AddAuthorization();
+
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Title = "Job Test API",
+            Version = "v1"
+        });
+
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Enter JWT Token"
+        });
+
+    options.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
             }
+        });
+});
 
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
+var app = builder.Build();
 
 
-            app.MapControllers();
+app.UseSwagger();
 
-            app.Run();
-        }
-    }
-}
+app.UseSwaggerUI();
+
+
+app.UseHttpsRedirection();
+
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+
+
+app.MapControllers();
+
+app.Run();
