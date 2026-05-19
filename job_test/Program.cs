@@ -1,4 +1,5 @@
 using job_test.Application.Interfaces;
+using job_test.Application.Services;
 using job_test.Infrastructure.Authentication;
 using job_test.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,6 +53,8 @@ builder.Services.AddAuthentication(options =>
         };
 });
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthorization();
 
