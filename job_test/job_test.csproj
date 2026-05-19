@@ -19,12 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BusinessLogic\DTO\" />
-    <Folder Include="BusinessLogic\IApplication\" />
-    <Folder Include="BusinessLogic\Application\" />
+    <Folder Include="Application\DTOs\" />
+    <Folder Include="Application\Interfaces\" />
+    <Folder Include="Application\Validators\" />
+    <Folder Include="Application\Services\" />
     <Folder Include="Controllers\" />
-    <Folder Include="DataAccess\Models\" />
-    <Folder Include="DataAccess\Enum\" />
+    <Folder Include="Infrastructure\Authentication\" />
+    <Folder Include="Infrastructure\Repositories\" />
+    <Folder Include="Middlewares\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
