@@ -9,11 +9,11 @@ namespace job_test.Application.Interfaces
 
         Task<List<Project>> GetAllAsync(int userId);
 
-        Task<Project?> GetByIdAsync(   int id,  int userId);
+        Task<Project?> GetByIdAsync( int id, int userId);
 
-        Task<Project?> UpdateAsync(  int id,   UpdateProjectDto dto,  int userId);
+        Task<Project?> UpdateAsync( int id,  UpdateProjectDto dto, int userId);
 
-        Task<bool> DeleteAsync(  int id,  int userId);
+        Task<bool> DeleteAsync( int id, int userId);
     }
 }
 

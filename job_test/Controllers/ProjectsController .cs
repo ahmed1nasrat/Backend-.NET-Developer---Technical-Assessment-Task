@@ -23,7 +23,7 @@ namespace job_test.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateProjectDto dto)
         {
-            var userId = int.Parse(  User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await _projectService.CreateAsync( dto, userId);
 
@@ -33,7 +33,7 @@ namespace job_test.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userId = int.Parse(   User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await _projectService.GetAllAsync( userId);
 
@@ -43,7 +43,7 @@ namespace job_test.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var userId = int.Parse(   User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var result = await _projectService.GetByIdAsync( id, userId);
 
