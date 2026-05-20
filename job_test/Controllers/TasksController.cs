@@ -14,38 +14,37 @@ namespace job_test.Controllers
     {
         private readonly ITaskService _taskService;
 
-        public TasksController(
-            ITaskService taskService)
+        public TasksController(ITaskService taskService)
         {
             _taskService = taskService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create( CreateTaskDto dto)
+        public async Task<IActionResult> Create(CreateTaskDto dto)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.CreateAsync( dto, userId);
+            var result = await _taskService.CreateAsync(dto, userId);
 
             return Ok(result);
         }
 
         [HttpGet("project/{projectId}")]
-        public async Task<IActionResult> GetByProject( int projectId)
+        public async Task<IActionResult> GetByProject(int projectId)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.GetByProjectAsync( projectId,  userId);
+            var result = await _taskService.GetByProjectAsync(projectId, userId);
 
             return Ok(result);
         }
 
         [HttpGet("{taskId}")]
-        public async Task<IActionResult> GetById( int taskId)
+        public async Task<IActionResult> GetById(int taskId)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.GetByIdAsync( taskId, userId);
+            var result = await _taskService.GetByIdAsync(taskId, userId);
 
             if (result == null)
             {
@@ -56,11 +55,11 @@ namespace job_test.Controllers
         }
 
         [HttpPut("{taskId}")]
-        public async Task<IActionResult> Update( int taskId, UpdateTaskDto dto)
+        public async Task<IActionResult> Update(int taskId, UpdateTaskDto dto)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.UpdateAsync( taskId, dto, userId);
+            var result = await _taskService.UpdateAsync(taskId, dto, userId);
 
             if (result == null)
             {
@@ -71,11 +70,11 @@ namespace job_test.Controllers
         }
 
         [HttpPatch("{taskId}/status")]
-        public async Task<IActionResult> UpdateStatus( int taskId, UpdateTaskStatusDto dto)
+        public async Task<IActionResult> UpdateStatus(int taskId, UpdateTaskStatusDto dto)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.UpdateStatusAsync( taskId, dto, userId);
+            var result = await _taskService.UpdateStatusAsync(taskId, dto, userId);
 
             if (result == null)
             {
@@ -86,11 +85,11 @@ namespace job_test.Controllers
         }
 
         [HttpDelete("{taskId}")]
-        public async Task<IActionResult> Delete( int taskId)
+        public async Task<IActionResult> Delete(int taskId)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _taskService.DeleteAsync( taskId, userId);
+            var result = await _taskService.DeleteAsync(taskId, userId);
 
             if (!result)
             {

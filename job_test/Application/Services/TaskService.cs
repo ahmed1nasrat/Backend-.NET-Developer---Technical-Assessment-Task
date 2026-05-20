@@ -1,4 +1,5 @@
 ﻿using job_test.Application.DTOs.Tasks;
+using job_test.Application.Exceptions;
 using job_test.Application.Interfaces;
 using job_test.Domain.Enums;
 using job_test.Domain.Models;
@@ -16,13 +17,27 @@ namespace job_test.Application.Services
             _context = context;
         }
 
-        public async Task<TaskItem> CreateAsync( CreateTaskDto dto, int userId)
+        private static TaskResponseDto MapToDto(TaskItem task)
         {
-            var project = await _context.Projects  .FirstOrDefaultAsync(x =>  x.Id == dto.ProjectId && x.UserId == userId);
+            return new TaskResponseDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                Priority = task.Priority,
+                Status = task.Status,
+                ProjectId = task.ProjectId
+            };
+        }
+
+        public async Task<TaskResponseDto> CreateAsync(CreateTaskDto dto,int userId)
+        {
+            var project = await _context.Projects.FirstOrDefaultAsync(x => x.Id == dto.ProjectId &&x.UserId == userId);
 
             if (project == null)
             {
-                throw new Exception("Project not found");
+                throw new NotFoundException("Project not found");
             }
 
             var task = new TaskItem
@@ -39,33 +54,42 @@ namespace job_test.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return task;
+            return MapToDto(task);
         }
 
-        public async Task<List<TaskItem>> GetByProjectAsync( int projectId, int userId)
+        public async Task<List<TaskResponseDto>> GetByProjectAsync(int projectId,int userId)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(x => x.Id == projectId && x.UserId == userId);
 
             if (project == null)
             {
-                throw new Exception("Project not found");
+                throw new NotFoundException("Project not found");
             }
 
-            return await _context.Tasks.Where(x => x.ProjectId == projectId).ToListAsync();
+            var tasks = await _context.Tasks.Where(x => x.ProjectId == projectId).ToListAsync();
+
+            return tasks.Select(MapToDto).ToList();
         }
 
-        public async Task<TaskItem?> GetByIdAsync( int taskId, int userId)
+        public async Task<TaskResponseDto> GetByIdAsync(int taskId, int userId)
         {
-            return await _context.Tasks.Include(x => x.Project).FirstOrDefaultAsync(x =>x.Id == taskId &&x.Project.UserId == userId);
-        }
-
-        public async Task<TaskItem?> UpdateAsync( int taskId, UpdateTaskDto dto, int userId)
-        {
-            var task = await _context.Tasks.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == taskId && x.Project.UserId == userId);
+            var task = await _context.Tasks .Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == taskId && x.Project.UserId == userId);
 
             if (task == null)
             {
-                return null;
+                throw new NotFoundException( "Task not found");
+            }
+
+            return MapToDto(task);
+        }
+
+        public async Task<TaskResponseDto> UpdateAsync( int taskId, UpdateTaskDto dto, int userId)
+        {
+            var task = await _context.Tasks.Include(x => x.Project) .FirstOrDefaultAsync(x => x.Id == taskId &&x.Project.UserId == userId);
+
+            if (task == null)
+            {
+                throw new NotFoundException("Task not found");
             }
 
             task.Title = dto.Title;
@@ -76,32 +100,32 @@ namespace job_test.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return task;
+            return MapToDto(task);
         }
 
-        public async Task<TaskItem?> UpdateStatusAsync( int taskId, UpdateTaskStatusDto dto, int userId)
+        public async Task<TaskResponseDto> UpdateStatusAsync(int taskId, UpdateTaskStatusDto dto, int userId)
         {
-            var task = await _context.Tasks.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == taskId && x.Project.UserId == userId);
+            var task = await _context.Tasks .Include(x => x.Project) .FirstOrDefaultAsync(x =>x.Id == taskId && x.Project.UserId == userId);
 
             if (task == null)
             {
-                return null;
+                throw new NotFoundException( "Task not found");
             }
 
             task.Status = dto.Status;
 
             await _context.SaveChangesAsync();
 
-            return task;
+            return MapToDto(task);
         }
 
-        public async Task<bool> DeleteAsync( int taskId, int userId)
+        public async Task<bool> DeleteAsync( int taskId,int userId)
         {
-            var task = await _context.Tasks .Include(x => x.Project) .FirstOrDefaultAsync(x => x.Id == taskId && x.Project.UserId == userId);
+            var task = await _context.Tasks .Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == taskId &&x.Project.UserId == userId);
 
             if (task == null)
             {
-                return false;
+                throw new NotFoundException( "Task not found");
             }
 
             _context.Tasks.Remove(task);

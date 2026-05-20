@@ -1,4 +1,5 @@
 ﻿using job_test.Application.DTOs.Auth;
+using job_test.Application.Exceptions;
 using job_test.Application.Interfaces;
 using job_test.Domain.Models;
 using job_test.Infrastructure.Persistence;
@@ -23,7 +24,7 @@ namespace job_test.Application.Services
 
             if (exists)
             {
-                return "Email already exists";
+                throw new BadRequestException("Email already exists");
             }
 
             var user = new User
