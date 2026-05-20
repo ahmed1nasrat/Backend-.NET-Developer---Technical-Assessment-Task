@@ -1,7 +1,11 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using job_test.Application.Interfaces;
 using job_test.Application.Services;
+using job_test.Application.Validators;
 using job_test.Infrastructure.Authentication;
 using job_test.Infrastructure.Persistence;
+using job_test.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +16,10 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
+builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectValidator>();
 builder.Services.AddControllers();
 
 
@@ -53,10 +61,11 @@ builder.Services.AddAuthentication(options =>
         };
 });
 
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
-
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 
 
@@ -113,7 +122,7 @@ app.UseSwagger();
 
 app.UseSwaggerUI();
 
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 
