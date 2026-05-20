@@ -1,4 +1,5 @@
 ﻿using job_test.Application.DTOs.Projects;
+using job_test.Application.Exceptions;
 using job_test.Application.Interfaces;
 using job_test.Domain.Models;
 using job_test.Infrastructure.Persistence;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace job_test.Application.Services
 {
-    public class ProjectService: IProjectService
+    public class ProjectService : IProjectService
     {
         private readonly ApplicationDbContext _context;
 
@@ -15,7 +16,18 @@ namespace job_test.Application.Services
             _context = context;
         }
 
-        public async Task<Project> CreateAsync( CreateProjectDto dto,int userId)
+        private static ProjectResponseDto MapToDto(Project project)
+        {
+            return new ProjectResponseDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Description = project.Description,
+                CreatedAt = project.CreatedAt
+            };
+        }
+
+        public async Task<ProjectResponseDto> CreateAsync(CreateProjectDto dto,int userId)
         {
             var project = new Project
             {
@@ -29,28 +41,35 @@ namespace job_test.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return project;
+            return MapToDto(project);
         }
 
-        public async Task<List<Project>> GetAllAsync(int userId)
+        public async Task<List<ProjectResponseDto>> GetAllAsync( int userId)
         {
-            return await _context.Projects .Where(x => x.UserId == userId) .ToListAsync();
+            var projects = await _context.Projects .Where(x => x.UserId == userId).ToListAsync();
+
+            return projects.Select(MapToDto) .ToList();
         }
 
-        public async Task<Project?> GetByIdAsync(
-            int id,
-            int userId)
+        public async Task<ProjectResponseDto> GetByIdAsync( int id, int userId)
         {
-            return await _context.Projects.FirstOrDefaultAsync(x => x.Id == id &&  x.UserId == userId);
+            var project = await _context.Projects.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+            if (project == null)
+            {
+                throw new NotFoundException("Project not found");
+            }
+
+            return MapToDto(project);
         }
 
-        public async Task<Project?> UpdateAsync( int id, UpdateProjectDto dto,int userId)
+        public async Task<ProjectResponseDto> UpdateAsync( int id, UpdateProjectDto dto, int userId)
         {
             var project = await _context.Projects .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
             if (project == null)
             {
-                return null;
+                throw new NotFoundException( "Project not found");
             }
 
             project.Name = dto.Name;
@@ -58,16 +77,16 @@ namespace job_test.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return project;
+            return MapToDto(project);
         }
 
-        public async Task<bool> DeleteAsync( int id, int userId)
+        public async Task<bool> DeleteAsync( int id,int userId)
         {
-            var project = await _context.Projects .FirstOrDefaultAsync(x =>  x.Id == id &&  x.UserId == userId);
+            var project = await _context.Projects.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
             if (project == null)
             {
-                return false;
+                throw new NotFoundException( "Project not found");
             }
 
             _context.Projects.Remove(project);

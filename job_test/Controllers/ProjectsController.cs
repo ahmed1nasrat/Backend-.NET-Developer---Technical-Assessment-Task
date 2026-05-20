@@ -47,10 +47,7 @@ namespace job_test.Controllers
 
             var result = await _projectService.GetByIdAsync( id, userId);
 
-            if (result == null)
-            {
-                return NotFound();
-            }
+         
 
             return Ok(result);
         }
@@ -62,10 +59,7 @@ namespace job_test.Controllers
 
             var result = await _projectService.UpdateAsync( id, dto, userId);
 
-            if (result == null)
-            {
-                return NotFound();
-            }
+         
 
             return Ok(result);
         }
@@ -75,12 +69,9 @@ namespace job_test.Controllers
         {
             var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _projectService.DeleteAsync( id, userId);
+            await _projectService.DeleteAsync( id, userId);
 
-            if (!result)
-            {
-                return NotFound();
-            }
+
 
             return Ok("Project deleted successfully");
         }
