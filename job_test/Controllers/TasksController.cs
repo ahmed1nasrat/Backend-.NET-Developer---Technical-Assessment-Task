@@ -1,88 +1,96 @@
-﻿    using job_test.Application.DTOs.Tasks;
-    using job_test.Application.Interfaces;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using System.Security.Claims;
+﻿using job_test.Application.DTOs.Tasks;
+using job_test.Application.Interfaces;
+using job_test.Domain.Enums;
+using job_test.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-    namespace job_test.Controllers
+namespace job_test.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class TasksController : ControllerBase
     {
-        [Route("api/[controller]")]
-        [ApiController]
-        [Authorize]
-        public class TasksController : ControllerBase
+        private readonly ITaskService _taskService;
+
+        public TasksController(ITaskService taskService)
         {
-            private readonly ITaskService _taskService;
+            _taskService = taskService;
+        }
 
-            public TasksController(ITaskService taskService)
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateTaskDto dto)
+        {
+            var userId = User.GetUserId();
+
+            var result = await _taskService.CreateAsync(dto, userId);
+
+            return Ok(result);
+        }
+
+        [HttpGet("project/{projectId}")]
+        public async Task<IActionResult> GetByProject(int projectId, [FromQuery] ProjectTaskStatus? status = null)
+        {
+            var userId = User.GetUserId();
+
+            var result = await _taskService.GetByProjectAsync(projectId, userId, status);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] ProjectTaskStatus? status = null)
+        {
+            var userId = User.GetUserId();
+
+            if (status.HasValue)
             {
-                _taskService = taskService;
+                var filtered = await _taskService.GetByStatusAsync(status.Value, userId);
+                return Ok(filtered);
             }
 
-            [HttpPost]
-            public async Task<IActionResult> Create(CreateTaskDto dto)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            return Ok(Array.Empty<TaskResponseDto>());
+        }
 
-                var result = await _taskService.CreateAsync(dto, userId);
+        [HttpGet("{taskId}")]
+        public async Task<IActionResult> GetById(int taskId)
+        {
+            var userId = User.GetUserId();
 
-                return Ok(result);
-            }
+            var result = await _taskService.GetByIdAsync(taskId, userId);
 
-            [HttpGet("project/{projectId}")]
-            public async Task<IActionResult> GetByProject(int projectId)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            return Ok(result);
+        }
 
-                var result = await _taskService.GetByProjectAsync(projectId, userId);
+        [HttpPut("{taskId}")]
+        public async Task<IActionResult> Update(int taskId, UpdateTaskDto dto)
+        {
+            var userId = User.GetUserId();
 
-                return Ok(result);
-            }
+            var result = await _taskService.UpdateAsync(taskId, dto, userId);
 
-            [HttpGet("{taskId}")]
-            public async Task<IActionResult> GetById(int taskId)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            return Ok(result);
+        }
 
-                var result = await _taskService.GetByIdAsync(taskId, userId);
+        [HttpPatch("{taskId}/status")]
+        public async Task<IActionResult> UpdateStatus(int taskId, UpdateTaskStatusDto dto)
+        {
+            var userId = User.GetUserId();
 
+            var result = await _taskService.UpdateStatusAsync(taskId, dto, userId);
 
-                return Ok(result);
-            }
+            return Ok(result);
+        }
 
-            [HttpPut("{taskId}")]
-            public async Task<IActionResult> Update(int taskId, UpdateTaskDto dto)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        [HttpDelete("{taskId}")]
+        public async Task<IActionResult> Delete(int taskId)
+        {
+            var userId = User.GetUserId();
 
-                var result = await _taskService.UpdateAsync(taskId, dto, userId);
+            await _taskService.DeleteAsync(taskId, userId);
 
-      
-
-                return Ok(result);
-            }
-
-            [HttpPatch("{taskId}/status")]
-            public async Task<IActionResult> UpdateStatus(int taskId, UpdateTaskStatusDto dto)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-                var result = await _taskService.UpdateStatusAsync(taskId, dto, userId);
-
-        
-
-                return Ok(result);
-            }
-
-            [HttpDelete("{taskId}")]
-            public async Task<IActionResult> Delete(int taskId)
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-                await _taskService.DeleteAsync(taskId, userId);
-
-          
-                return Ok("Task deleted successfully");
-            }
+            return Ok("Task deleted successfully");
         }
     }
+}

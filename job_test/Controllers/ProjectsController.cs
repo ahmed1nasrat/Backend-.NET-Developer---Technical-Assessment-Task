@@ -1,9 +1,8 @@
 ﻿using job_test.Application.DTOs.Projects;
 using job_test.Application.Interfaces;
+using job_test.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace job_test.Controllers
 {
@@ -23,9 +22,9 @@ namespace job_test.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateProjectDto dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = User.GetUserId();
 
-            var result = await _projectService.CreateAsync( dto, userId);
+            var result = await _projectService.CreateAsync(dto, userId);
 
             return Ok(result);
         }
@@ -33,9 +32,9 @@ namespace job_test.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = User.GetUserId();
 
-            var result = await _projectService.GetAllAsync( userId);
+            var result = await _projectService.GetAllAsync(userId);
 
             return Ok(result);
         }
@@ -43,23 +42,19 @@ namespace job_test.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = User.GetUserId();
 
-            var result = await _projectService.GetByIdAsync( id, userId);
-
-         
+            var result = await _projectService.GetByIdAsync(id, userId);
 
             return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update( int id, UpdateProjectDto dto)
+        public async Task<IActionResult> Update(int id, UpdateProjectDto dto)
         {
-            var userId = int.Parse(  User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = User.GetUserId();
 
-            var result = await _projectService.UpdateAsync( id, dto, userId);
-
-         
+            var result = await _projectService.UpdateAsync(id, dto, userId);
 
             return Ok(result);
         }
@@ -67,11 +62,9 @@ namespace job_test.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = int.Parse( User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = User.GetUserId();
 
-            await _projectService.DeleteAsync( id, userId);
-
-
+            await _projectService.DeleteAsync(id, userId);
 
             return Ok("Project deleted successfully");
         }

@@ -1,4 +1,5 @@
 ﻿using job_test.Application.DTOs.Tasks;
+using job_test.Domain.Enums;
 
 namespace job_test.Application.Interfaces
 {
@@ -6,7 +7,9 @@ namespace job_test.Application.Interfaces
     {
         Task<TaskResponseDto> CreateAsync(CreateTaskDto dto, int userId);
 
-        Task<List<TaskResponseDto>> GetByProjectAsync(int projectId, int userId);
+        Task<List<TaskResponseDto>> GetByProjectAsync(int projectId, int userId, ProjectTaskStatus? status = null);
+
+        Task<List<TaskResponseDto>> GetByStatusAsync(ProjectTaskStatus status, int userId);
 
         Task<TaskResponseDto?> GetByIdAsync(int taskId, int userId);
 

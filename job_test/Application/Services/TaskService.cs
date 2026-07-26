@@ -46,7 +46,7 @@ namespace job_test.Application.Services
                 Description = dto.Description,
                 DueDate = dto.DueDate,
                 Priority = dto.Priority,
-                Status = ProjectTaskStatus.Pending,
+                Status = ProjectTaskStatus.ToDo,
                 ProjectId = dto.ProjectId
             };
 
@@ -57,7 +57,7 @@ namespace job_test.Application.Services
             return MapToDto(task);
         }
 
-        public async Task<List<TaskResponseDto>> GetByProjectAsync(int projectId,int userId)
+        public async Task<List<TaskResponseDto>> GetByProjectAsync(int projectId, int userId, ProjectTaskStatus? status = null)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(x => x.Id == projectId && x.UserId == userId);
 
@@ -66,7 +66,24 @@ namespace job_test.Application.Services
                 throw new NotFoundException("Project not found");
             }
 
-            var tasks = await _context.Tasks.Where(x => x.ProjectId == projectId).ToListAsync();
+            var query = _context.Tasks.Where(x => x.ProjectId == projectId);
+
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+
+            var tasks = await query.ToListAsync();
+
+            return tasks.Select(MapToDto).ToList();
+        }
+
+        public async Task<List<TaskResponseDto>> GetByStatusAsync(ProjectTaskStatus status, int userId)
+        {
+            var tasks = await _context.Tasks
+                .Include(x => x.Project)
+                .Where(x => x.Project.UserId == userId && x.Status == status)
+                .ToListAsync();
 
             return tasks.Select(MapToDto).ToList();
         }
