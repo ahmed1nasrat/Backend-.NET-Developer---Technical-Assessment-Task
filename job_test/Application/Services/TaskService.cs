@@ -78,6 +78,16 @@ namespace job_test.Application.Services
             return tasks.Select(MapToDto).ToList();
         }
 
+        public async Task<List<TaskResponseDto>> GetAllAsync(int userId)
+        {
+            var tasks = await _context.Tasks
+                .Include(x => x.Project)
+                .Where(x => x.Project.UserId == userId)
+                .ToListAsync();
+
+            return tasks.Select(MapToDto).ToList();
+        }
+
         public async Task<List<TaskResponseDto>> GetByStatusAsync(ProjectTaskStatus status, int userId)
         {
             var tasks = await _context.Tasks

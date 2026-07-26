@@ -50,7 +50,8 @@ namespace job_test.Controllers
                 return Ok(filtered);
             }
 
-            return Ok(Array.Empty<TaskResponseDto>());
+            var all = await _taskService.GetAllAsync(userId);
+            return Ok(all);
         }
 
         [HttpGet("{taskId}")]

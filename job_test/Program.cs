@@ -16,7 +16,15 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddFluentValidationAutoValidation();
 
@@ -126,6 +134,8 @@ var app = builder.Build();
 app.UseSwagger();
 
 app.UseSwaggerUI();
+
+app.UseCors("AllowAngularApp");
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();

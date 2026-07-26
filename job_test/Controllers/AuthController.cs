@@ -1,6 +1,6 @@
 ﻿using job_test.Application.DTOs.Auth;
+using job_test.Application.Exceptions;
 using job_test.Application.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace job_test.Controllers
@@ -15,12 +15,19 @@ namespace job_test.Controllers
         {
             _authService = authService;
         }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var result = await _authService.RegisterAsync(dto);
-
-            return Ok(result);
+            try
+            {
+                var result = await _authService.RegisterAsync(dto);
+                return Ok(new { message = result });
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("login")]
@@ -30,7 +37,7 @@ namespace job_test.Controllers
 
             if (result == null)
             {
-                return Unauthorized("Invalid email or password");
+                return Unauthorized(new { message = "Invalid email or password" });
             }
 
             return Ok(result);

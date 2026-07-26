@@ -9,7 +9,9 @@ namespace job_test.Application.Interfaces
 
         Task<List<TaskResponseDto>> GetByProjectAsync(int projectId, int userId, ProjectTaskStatus? status = null);
 
-        Task<List<TaskResponseDto>> GetByStatusAsync(ProjectTaskStatus status, int userId);
+        Task<List<TaskResponseDto>> GetAllAsync(int userId);
+
+    Task<List<TaskResponseDto>> GetByStatusAsync(ProjectTaskStatus status, int userId);
 
         Task<TaskResponseDto?> GetByIdAsync(int taskId, int userId);
 
